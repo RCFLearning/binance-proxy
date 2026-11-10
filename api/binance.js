@@ -1,14 +1,14 @@
 export const config = {
-  // Hardcodes execution strictly to Frankfurt, Germany to eliminate HTTP 451
+  // Locks execution strictly to Frankfurt, Germany (bypasses HTTP 451)
   regions: ['fra1'],
 };
 
 export default async function handler(req, res) {
-  // Extract path and query params (e.g., /fapi/v2/positionRisk?timestamp=...)
-  const url = new URL(req.url, `https://${req.headers.host}`);
-  const targetUrl = `https://fapi.binance.com${url.pathname}${url.search}`;
-
   try {
+    // Extract the signed query string (timestamp, signature, recvWindow)
+    const query = req.url.includes('?') ? req.url.substring(req.url.indexOf('?')) : '';
+    const targetUrl = `https://fapi.binance.com/fapi/v2/positionRisk${query}`;
+
     const response = await fetch(targetUrl, {
       method: req.method,
       headers: {
